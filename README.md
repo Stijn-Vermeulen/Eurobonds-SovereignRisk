@@ -1,4 +1,4 @@
-# Eurobonds-SovereignRisk
+# Eurobonds & Sovereign Risk
 This thesis was submitted to obtain the degree of Master of Advanced Studies in Economics.
 
 # Step-by-step guide to replicating the results
