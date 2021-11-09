@@ -1,0 +1,257 @@
+
+\pagestyle{headings}
+
+\chapter{Eurobonds in a sovereign default model}
+This chapter will detail the model used to research the effects of introducing Eurobonds in a small-open economy, starting with the description of a sovereign default model and the environment in which the relevant agents operate in section 2.1. Section 2.2 will continue by discussing the calibrated parameters and their economic significance. Finally, section 2.3 closes this chapter by briefly discussing the computational algorithm used to solve the model.\\
+\section{Model}
+To study the effect of introducing a form of debt mutualisation like a Eurobond, we will study a model in the spirit of Eaton \& Gersovitz (1981) with debt repudiation. Closely following the work by Hatchondo et al. (2017), the model will include a non-defaultable asset which resembles the creation of a safe and with joint liability form of debt. We follow the original paper's method in their implementation of Eurobonds, namely that any concerns on "moral hazard" or the "no-bailout" clause have been overcome. In addition to introducing non-defaultable debt, the model will also be extended by introducing a form of debt renegotiation as a Nash-bargain game following the work of Yue (2010). As we will see in the discussion of the results in the last chapter, allowing for an explicit debt renegotiation process has significant mid- to long-term implications.\\
+\subsection{Environment}
+The government will be assumed to be benevolent and act in the interests of its constituents. This implies that it will make its decisions based on the same preferences as rational consumers and will seek to maximize the same utility function. The preferences are described by equation \ref{preferences}:
+\begin{equation}\label{preferences}
+    E_t\sum_{t=j}^{\infty} \beta^t u(c_t) \mbox{ with } 0<\beta<1
+\end{equation}
+Equation \eqref{preferences} states that the lifetime utility of the government is given by the expected value of the infinite sum of discounted utility functions where $E_t$ is the expectations operator at time t, $\beta$ is the subjective discount factor and $u(c_t)$ the utility gained from consumption. The model will assume that the utility function belongs to the class of constant relative risk averse functions, namely it will take the form of an iso-elastic function:\\
+\begin{equation*}
+    u(c_t)=\frac{c_t^{1-\gamma}-1}{1-\gamma} \mbox{, with }\gamma\neq1
+\end{equation*}
+with $\gamma$ the parameter for risk aversion. The utility function is therefore increasing in consumption, strictly concave and continuous.\\
+
+Each period households will receive an endowment \textit{y} which they will use to consume. The endowment \textit{y} is an element of a set  $Y \subset \R_{++}$ and follows a stochastic Markov process, i.e. income tomorrow only depends on income today. This process is described by:
+\begin{equation}\label{VAR}
+    \log(y_t) = (1-\rho)\mu + \rho \log(y_{t-1}) + \epsilon_t
+\end{equation}
+with the income correlation $\rho$, the mean log income $\mu$ and noise component $\epsilon_t$. Additionally, we assume that $|\rho|<1$ and $\epsilon_t\sim N(0,\sigma_{\epsilon}^{2})$. Based on this Markov process we can estimate the probability of transitioning from one output level to another. To do so the procedure as described by Uribe \& Schmitt-Grohé (2017, p.526-527) is followed and we create a transition matrix based on a simulation of equation \eqref{VAR}.\\
+
+The asset space used in this model is defined by both defaultable debt \textit{d} and non-defaultable debt \textit{e} (i.e. Eurobonds). As is common for Eaton-Gersovitz models, debt contracts are assumed to be non-state contingent and the government lacks the ability to commit to payment. Unlike Hatchondo et al. (2017), however, we will only consider the case where both forms of debt are short-term and need to be paid back after one quarter. Both types of debt contracts are priced in a competitive market with a large number of foreign, risk-neutral investors. Risk-neutrality implies that bond prices adhere to a zero-profit condition, i.e. prices will be equal to expected returns. As the name suggests, a non-defaultable asset cannot be defaulted on which makes it risk-free and its price will be equal to $\frac{1}{1+r^*}$. Defaultable debt on the other hand will entail some risk and investors will incorporate this risk in its price \textit{q} (cf. infra).\\
+
+Each period a government will determine whether it is more beneficial to continue repaying its debt obligations or to default on its outstanding stock. If a default occurs, access to the defaultable debt market is lost and the duration of this exclusion is determined by a stochastic factor $\theta \in \left[0,1\right]$. In addition, the economy suffers an income loss in every period it is excluded from the defaultable debt market. Access to this market is regained by giving holders of a defaulted bond a new defaultable bond promising to pay $d_B(y')$ (Hatchondo et al., 2017). This recovery rate is endogenously explained in the model, as it will be determined by a Nash-bargain game.\\
+
+\subsection{Timing}
+As the government makes several decisions each period, it is important to clearly define the order in which these decisions are made. The timing of events goes as follows:
+\begin{enumerate}
+    \item Period \textit{t} starts and the government and all other agents learn the state of the economy \textit{y} and level of indebtedness, both defaultable debt \textit{d} and non-defaultable debt \textit{e}.
+    \item After learning the starting position, the government decides whether or not to default.
+    \begin{itemize}
+        \item If no default occurs, the government pays back outstanding debt and chooses the debt levels for the next period.
+        \item If the government defaults, the government is excluded from the defaultable debt market, non-defaultable debt can only be rolled-over and the economy is hit by an income loss. These restrictions are in place for a stochastic determined period where $\theta$ is the probability of possible reentry. Upon reentry the government will have to pay a fraction of the defaulted-on debt back to investors. This fraction $\frac{d_B}{d}$ is determined by a Nash-bargain game, which will be elaborated on in section 2.1.3.
+    \end{itemize}
+    \item Period \textit{t+1} starts.
+\end{enumerate}
+\subsection{Recursive formulation}
+In this section we characterize the dynamic recursive equilibrium. The model is characterized by three specific building blocks: the government's problem, the renegotiation process and the international lenders' pricing problem.\\ 
+
+\subsubsection{Government's problem}
+As stated before, the government is considered to act in the interest of its constituents and will therefore also borrow on their behalf on the international, financial market. Any borrowed funds will be transferred to consumers in a lump sum nature. When considering the optimal policy, it will determine its best course of action from three possible states: 1) continue repaying outstanding debt, 2) default and renegotiate or 3) default and refuse to negotiate. The solution to the government's problem is given by equation \eqref{Value Function Good}, \eqref{Value Function cont}, \eqref{Value Function bad} and \eqref{Value Function Autarky}.\\
+
+The government is considered to be in good standing when, in its current state, it has not defaulted and therefore still has access to the financial markets. We associate the value function V with being in good standing and this function will be dependent on three state variables: the endowment \textit{y} and current defaultable and non-defaultable debt stock \textit{d} and \textit{e}. For any bond price \textit{q}, the value of being in good standing $V$ will satisfy: 
+\begin{equation}\label{Value Function Good}
+    V(d,e,y) = \max\{V_C(d,e,y),V_B(d_B(y),e,y),V_A(y)\}
+\end{equation}
+with $V_C$, $V_D$ and $V_A$ the value functions of continuation, bad standing and autarky respectively. In other words, this equation says that when the government is in good standing and has access to financial markets, it will decide each period whether or not it is more beneficial to continue repaying its debt or to default on its defaultable debt stock. When default is the preferable option, a second choice is made on whether to renegotiate its debt level or not. Both the value of continuation $V_C$ and the value of defaulting $V_B$ will be the result of a maximization problem. The value function of financial autarky $V_A$, on the other hand, only depends on the current endowment level $y$.\\
+
+The value of continuation is given by the following Bellman equation:
+\begin{equation}\label{Value Function cont}
+    V_C(d,e,y) = \max_{d'\geq 0,e'\geq 0, c \geq 0} u(c) + \beta E_{y'\mid y} V_C(d',e',y')
+\end{equation}
+subject to
+\begin{equation*}
+  c = y - d - e + q(d',e',y)d' + \frac{e'}{1+r^*}
+\end{equation*}
+\begin{equation*}
+    e'\leq \bar{e}_R
+\end{equation*}
+
+Given the state of the economy $(d,e,y)$, the government will choose the optimal level of consumption \textit{c} and debt stock due next period $d'$ and $e'$ subject to a budget constraint such that it maximizes the objective function \eqref{Value Function cont}. The optimization is restricted in such a way that it cannot consume more resources than the sum of the endowment \textit{y} and net debt issuance and that it is limited in issuing non-defaultable debt by $\bar{e}_R$. In the baseline model, $\bar{e}_R$ will be set equal to 10\% of GDP.\\
+
+Similar to continuation, the value function of bad standing is the solution of a maximization problem which is described by:
+\begin{equation}\label{Value Function bad}
+    V_B(d_B,e,y) = \max_{e_B'\geq 0, c_b \geq 0} u(c_b) + \beta E_{y'\mid y} [(1-\theta)V_B(d_B,e_B',y') + \theta V(d_B,e_B',y')]
+\end{equation}
+subject to
+\begin{equation*}
+  c_b = y -L(y) - e_B + \frac{e'_B}{1+r^*}
+\end{equation*}
+\begin{equation*}
+    e_B'\leq e
+\end{equation*}
+Similar to before, the optimal choices will be restricted by a budget constraint and a limit on non-defaultable debt issuance. Non-defaultable debt will be restricted such that it can only be rolled-over and not increased. Unlike under continuation the government will maximize the value of bad standing by only choosing optimal consumption and non-defaultable debt as it will no longer be able to issue new defaultable debt. Nonetheless, defaultable debt still plays a role as a state variable as upon reentry the country will owe the investors $d_B$. The optimal value of the partial debt recovery is determined by a renegotiation process (cf. infra). Another difference with the value function under continuation is that the future expected value of being in bad standing is a weighted average of reentering the defaultable debt market and staying in bad standing. The weighting of each possible state is determined by the probability of reentry $\theta$.\\
+
+The third and last possible state a country can find itself in is a state of complete financial autarky. To get in a state of financial autarky, the government must have defaulted on its outstanding defaultable debt and refused to renegotiate this debt stock. If this occurs, the government will lose all access to financial markets, including the non-defaultable debt market. The value function for this state is given by \eqref{Value Function Autarky}
+\begin{equation}\label{Value Function Autarky}
+    V_A(y) = u(c_a) + \beta V_A(y')
+\end{equation}
+subject to
+\begin{equation*}
+    c_a = y - L(y)
+\end{equation*}
+with $c_a$ the consumption level in autarky. As equation \eqref{Value Function Autarky} describes, the value function is determined by only the level of output as both defaultable and non-defaultable debt are no longer available. This will be considered an absorbent state, i.e. once in financial autarky there is no possibility to regain access.\\
+
+\subsubsection{Renegotiation and restructuring of defaultable debt}
+When a sovereign has defaulted on its outstanding defaultable debt it will first have to go through a renegotiation and restructuring process before regaining access to the financial market. Both the government and international lenders will be involved in this process, which will be simulated as a Nash-bargain game, as is done in the work by Yue (2010). From this bargain game, an optimal compromise is found between the interests of the two parties which will be represented by their surpluses of restructuring. For simplicity, however, this section will not follow Yue's notation and instead opt for the notation used by Uribe \& Schmitt-Grohé (2017, p.565-569).\\
+
+The first surplus to consider is the one of the government. The motivation for the government to participate in the renegotiation is two-fold: First of all, if it would not participate in renegotiation, the temporary exclusion from the defaultable debt market will become of a permanent nature, thus leading to a permanent loss of the ability to smooth consumption. Second, when in a state of default, non-defaultable debt can only be rolled over, thus limiting the ability to smooth out consumption even further. The surplus for the government is then given by the difference in value between defaulting and renegotiating $V_B(d_B,e,y)$ and autarky $V_A(y)$. To express this surplus in terms of goods, we divide the difference in value functions by the marginal utility of consumption when in autarky:
+\begin{equation*}
+    \text{\textit{Surplus of the debtor country}} = \frac{V_B(d_B,e,y)-V_A(y)}{u'(c_a)}
+\end{equation*}
+Given the previously mentioned motivation for participation, it should come as no surprise that this surplus is always non-negative and the government will always prefer to participate. This also implies that the state of financial autarky is never actually reached, as a government will always be able to replicate a situation of autarky by first renegotiating and then defaulting shortly after reentry (Uribe \& Schmitt-Grohé, 2017, p.566).\\
+
+The second surplus, the surplus of creditors, is determined by the value of restructured debt. If restructuring took place, an investor would receive an amount of bonds $d_B$ with value $q_B$. If no restructuring took place, they would receive nothing. Thus, similar to the surplus of the debtor, the creditor's surplus is determined by the difference between the two outcomes:
+\begin{equation*}
+    \text{\textit{Surplus of the creditors}} = q_B(d_B,e,y)d_B - 0
+\end{equation*}
+The optimal renegotiated debt level will be determined by a Nash-bargain game which we will represent by a Cobb-Douglas function: 
+\begin{equation}\label{reneg}
+    d_B(y) = argmax_x \Bigg[\frac{V_B(x,e,y)-V_A(y)}{u'(c_a)}\Bigg]^\alpha\bigg[q_B(x,e,y)x\bigg]^{1-\alpha}
+\end{equation}
+with $\alpha \in [0,1]$ the parameter for bargaining power. The level of restructured debt will only be a function of output and thus will introduce a form of state contingency.\\
+
+In the special case in which the government has complete bargain power and $\alpha = 1$, a specific limitation is imposed on the restructured debt level: $d_B = \min\{d, d_S\}$ with $d_S$ the standard haircut value. Intuitively, this restriction imposes that a government will only decide to take a haircut for debt levels higher than the standard haircut level.\\
+
+As we now know the optimal level of restructured debt $d_B(y)$, we can also determine the true value function on which the government bases its default decision, namely:
+\begin{equation}
+    V_D(e,y) \equiv V_B(d_B(y),e,y)
+\end{equation}
+With this true value of defaulting $V_D$, we can formulate the decision rule $\hat{p}$ for defaulting and this is given by:
+\begin{equation}\label{default decision}
+    \hat{p}(d,e,y) \equiv 
+    \begin{cases}
+    1 & \text{if $V_C(d,e,y) < V_D(e,y)$}\\
+    0 & \text{otherwise}\\
+    \end{cases}
+\end{equation}
+
+From solving equation \eqref{Value Function Good} to \eqref{default decision}, we get the policy functions for defaultable debt under continuation $\hat{d}$ and renegotiation $\hat{d}_B$, non-defaultable debt under continuation $\hat{e}$ and bad standing $\hat{e}_B$, consumption under continuation $\hat{c}$ and bad standing $\hat{c_b}$, and lastly the default decision rule $\hat{p}$. These policy functions will be used by investors to price defaultable debt contracts correctly, which we will discuss in the next section.\\
+
+\subsubsection{International lenders' problem}
+The international financial market is characterized by perfect competition and a large number of investors who are risk neutral. They are considered to be rational and will use the decision rules, described in the previous paragraph, to price debt contracts. The price of a defaultable debt contract $q(d',e',y)$ has to satisfy the following zero-expected profit condition:
+\begin{equation}\label{ZP not default}
+\begin{split}
+        (1+r^*)q(d',e',y) = E_{y'\mid y}\bigg\{(1-\hat{p}(d',e',y')\big) + \hat{p}(d',e',y')\frac{d_B(y')}{d'}q_B(d_{B}(y'),e',y')\bigg\}
+\end{split}
+\end{equation}
+with $r^*$ the risk free interest rate, $\hat{p}$ the default decision, $q_B(d_B(y'),e',y')$ the price of a defaulted bond and $\frac{d_B(y')}{d'}$ the recovery rate. Intuitively, this equation \eqref{ZP not default} imposes is that the expected return of selling a bond at price $q$ and buying a risk free asset in its place, should be the same as holding on to the bond and receiving its expected return.\\
+
+In the early literature on sovereign default models it is often assumed that when a government defaults, it does so on all outstanding debt (e.g. Aguiar \& Gopinath, 2006; Arellano, 2008). This would conform to the value $q_B(d_{B}(y'),e',y')$ being equal to zero. In this model, however, we will allow for some form of debt recovery which conforms more to what is observed empirically (Uribe \& Schmitt-Grohé, 2017, p.483-484). This implies that $q_B(d_{B}(y'),e',y')$ will be positive and a defaulted bond will retain some of its original value. The value of a defaulted bond has to conform to a zero-profit condition as well, which is described by equation \eqref{ZP default}:\\
+\begin{equation}
+\label{ZP default}
+\begin{split}
+    (1+r^*)q_B(d',e',y) =  E_{y'\mid y}\bigg\{\theta[1-\hat{p}(d',e',y')] + \theta\hat{p}(d',e',y')\frac{d_B(y')}{d'}q_B(d',e',y') \\ + (1-\theta)q_B(d',e',y')\bigg\}
+   \end{split}
+\end{equation}
+\clearpage
+The expected return of a defaulted bond will be determined by three components. The first component is the return an investor would get if a country gets the signal to reenter and decides to repay its debt obligations. The second component describes the expected payoff when the country gets the signal to reenter the financial markets, however it decides to default immediately after. This initiates another renegotiation process involving another possible haircut. The third and last component describes the probability that a government would not get the reentry signal and will therefore stay in default. The expected return in this scenario is then measured by the remaining bond price $q_B(d',e',y')$.\\
+\subsection{Recursive equilibrium}
+To finish the description of the model, we now define a stationary recursive equilibrium. Our equilibrium is characterized by a collection of value functions $V$, $V_C$, $V_A$ and $V_B$, a default rule $\hat{p}$, borrowing rules $\hat{d}$, $\hat{d_B}$, $\hat{e}$, $\hat{e}_B$ and bond price functions $q$ and $q_B$ such that:
+\begin{enumerate}
+    \item given the price functions $q$ and $q_B$ and the recovery rate $\frac{d_B(y')}{d'}$; the value functions $V$, $V_C$, $V_A$ and $V_B$ and decision rules $\hat{p}$, $\hat{d}$, $\hat{e}$, $\hat{e}_B$ solve the Bellman equations \eqref{Value Function Good}, \eqref{Value Function cont} and \eqref{Value Function bad}.
+    \item given the price functions $q$ and $q_B$ and the value functions $V$, $V_C$, $V_A$ and $V_B$; the recovery rate $\frac{d_B(y')}{d'}$ solves the renegotiation problem \eqref{reneg}
+    \item given the recovery rate $\frac{d_B(y')}{d'}$ and value functions  $V$, $V_C$, $V_A$ and $V_B$; the bond prices $q$ and $q_B$ satisfy the zero-profit conditions \eqref{ZP not default} and \eqref{ZP default}.
+\end{enumerate}
+
+\section{Calibration}
+Before solving the model, we first need to briefly discuss the parameterisation of the model and the economic importance of these parameters. The values of the parameters listed in Table \ref{tab:Calibration} are those that are used for the baseline model. Later in Chapter 3, we will test whether alternate values for certain parameters change the outcome or behaviour of the results. Table \ref{tab:Calibration} lists two kinds of parameters: standard parameters and target parameters. To define the former category, we will rely on the literature. The latter category will be used specifically to calibrate the model to several target statistics. The calibration will seek to approximate a European Economy (e.g. Spain) as close as possible, similar to Hatchondo et al. (2017).\\
+
+\begin{table}[h]
+\setlength{\arrayrulewidth}{0.3mm}
+\centering
+    \caption{\textbf{Calibration of baseline default model}}
+    \label{tab:Calibration}
+    \vspace{1mm}
+ \begin{tabular}{lccc} 
+\hline\hline
+\textbf {Description}                          &  \textbf {Item}       &&  \textbf {Value}                  \\[1ex] 
+\hline\hline
+\textit{\underline{Parameters}}                &                       &&                                  \\[1ex]
+Risk free interest rate                         & $r^*$                 && 0.01                             \\[1ex]
+Risk aversion                                   & $\sigma$              && 2                                \\[1ex] 
+Reentry probability                             & $\theta$              && 0.282                            \\[1ex] 
+Coefficient income auto-correlation              & $\rho$                && 0.9                              \\[1ex] 
+Standard deviation of innovations               & $\sigma_\epsilon$     && 0.03                             \\[1ex] 
+Mean log income                                 & $\mu$                 && -$\frac{1}{ 2}\sigma_\epsilon$   \\[1ex] 
+\textit{\underline{Target Parameters}}          &                       &&                               \\[1ex] 
+Parameter for income cost default (linear)      & $a_1$                 &&-0.25                             \\[1ex] 
+Parameter for income cost default (quadratic)   & $a_2$                 && 0.4681
+\\[1ex] 
+Quarterly subjective discount factor            & $\beta$               && 0.90                             \\[1ex] 
+Parameter for bargaining power                  & $\alpha$              && 1                             \\[1ex]
+Standard haircut                                & $d_S$                 && 1.6                             \\[1ex]
+\hline\hline
+Target: Default frequency (Annual)              &                       && 0.84\%                           \\[1ex] 
+Target: Average Debt-to-GDP ratio (Annual)      &$E_t(\frac{d_t}{Y_t})$ && 59.21\%                             \\[1ex]
+Target: Average Risk Premium (Annual)           & $E_t(r-r^*)$          && 0.29\%                          \\[1ex]
+\hline\hline
+\end{tabular}
+\end{table}
+\subsection{Standard parameters}
+In the model the risk free interest rate $r^*$ and parameter for risk aversion $\sigma$ are set equal to 1\% and 2, respectively. These are standard values in the literature and are, for example, used in Hatchondo et al, 2017; Mendoza \& Yue (2012), Chatterjee \& Eyigungor(2012), Arrelano (2008).\\
+
+The parameter $\theta$ or the probability of receiving the reentry signal to financial markets is set to 0.282. This conforms to estimates made by Gelos, Sahay \& Sandleris (2004) and has been used by several papers in the literature (Hatchondo et al., 2017; Önder \& Sunel, 2020). The inverse of this parameter $\frac{1}{\theta}$ defines the average duration of an exclusion period and this would imply that a country on average would regain access to financial markets within a year of defaulting. In section 3.4, we will check for different values of $\theta$.\\
+
+As stated in section 2.1.1 output is determined by a stochastic Markov process. The parameters used in this AR(1) process are the auto-correlation coefficient $\rho$, standard deviation of output $\sigma_\epsilon$ and mean log income $\mu$. In the original work by Hatchondo, Martinez \& Önder (2017) these parameters are based on an estimation of the time series of Spain's GDP between 1970 and 2012. In our model, however, using these estimates leads to a situation where no default would ever occur. This would also lead to a 0\% risk premium, since in this model the premium depends on the risk of default. Therefore, the parameters of equation \eqref{VAR} are set to 0.9, 0.03 and $-\frac{1}{2}\sigma_\epsilon$ respectively to generate an economy with a non-zero probability of default. These parameters are closer to values used for models with a South American economy, like Brasil or Argentina (Arrelano, 2008; Arellano \& Ramanarayanan, 2012; Chatterjee \& Eyigungor, 2015).\\
+
+\subsection{Target parameters}
+Our model without Eurobonds introduced will be calibrated to match the risk premium and average debt-to-GDP ratio of an economy similar to Spain. To accomplish this, five parameters are used: the parameters for the income cost of default $a_1$ and $a_2$, the subjective discount factor $\beta$, the parameter for bargaining power $\alpha$ and the standard haircut value $d_S$.\\
+\clearpage
+The first two target parameters for the income cost of default are used to define the output loss function $L(y)$ which was mentioned earlier in section 2.1. The income loss function imposes an additional cost of defaulting on outstanding debt, as merely being excluded from financial markets is generally not enough to support realistic debt levels (Uribe \& Schmitt-Grohé, 2017, p.522). The loss function will take the form of a quadratic function in output:
+\begin{equation*}
+    L(y) = \max(0 , a_1y + a_2y^2)
+\end{equation*}
+with $y$ the output level. Function $L(y)$ ensures that the loss function is positive and non-decreasing which makes defaulting in good times more costly. The linear term $a_1$ and quadratic term $a_2$ are set to -0.25 and 0.4681, respectively. For the lowest value of y, this would mean an output loss of 
+7.5\% while for the highest value of y an output loss of 50\% would occur. Even though this loss function is implemented on an ad-hoc basis, this property is also supported in the work of Mendoza \& Yue (2012) whose model endogenises default costs and finds that these costs increase with higher levels of Total Factor Productivity.\\
+
+The subjective discount factor $\beta$ will also be used as a parameter to target a feasible debt-to-GDP ratio. In this model it will be set equal to 0.9. This is a considerably lower value for the discount factor compared to typical models without default, e.g. New-Keynesian DSGE models (e.g. Smets \& Wouters, 2002; Galí, Valles \& López-Salido, 2005). However, a value this low for $\beta$ is not uncommon for sovereign default models (e.g. Mendoza \& Yue, 2012; Yue, 2010). Ceteris paribus, $\beta$ affects the predictions of the model through two channels: a supply \& demand channel for debt and a default cost channel. The net result will be that for a higher value of $\beta$ the risk of default will decrease and thus resulting in a lower risk premium while simultaneously increasing debt in good times (Uribe \& Schmitt-Grohé, 2017, p.538).\\ 
+
+The last two parameters which will be used as targeters are the parameter for bargaining power $\alpha$ and the standard haircut value $d_S$. As stated in the outline of the model, $\alpha$ signals the relative importance of bargaining power between the debtor country and the creditor investors. The higher the value of $\alpha$, the stronger the bargaining power of the government is and vice versa. For the baseline model, $\alpha$ will be set equal to 1 thus giving all the bargain power to the debtor country. By doing so, we will replicate the restructuring process used in Hatchondo et al. (2017) where the government restructures debt following the rule: $d_B = min\{b,d_S\}$. In addition, the standard haircut value $d_S$ will be set equal to 1.6 which will lead to an average haircut of close to 31\%. Later in the simulations, the assumption of full control for the government in the restructuring process will be relaxed and different values for $\alpha$ will be considered.\\
+
+\subsection{Preliminary results under the calibration}
+Regarding the current calibration, simulations from the model without Eurobonds predicts an average debt-to-GDP ratio of 59.21\%, an annual default frequency of 0.84\% and an average risk premium of 0.29\%. Both the debt-to-GDP ratio and risk premium are considerably lower than what is observed in the data. The observed Spanish average debt-to-GDP ratio between 2007 and 2019 lies around 79\% (Eurostat, 2020b) and the average risk premium during the same period lies around 1.5\%\footnote{Calculated as the spread between Spanish and German bonds.} for long-term debt with an average maturity of 10 years (Eurostat, 2020a). Nonetheless, the current parameterisation delivers the best approximation for the model of Hatchondo et al. (2017) with a debt ratio of 67\% and risk premium of 2\%. Additionally, it is not unreasonable to assume that debt levels will drop over time as 60\% is the target on debt imposed by the Stability and Growth Pact (SGP) of the European Union (European Commission, 2019). The last target calibration parameter to consider is the predicted annual default frequency. Solving the model gives us a frequency of 0.84\% which implies that a default episode would occur every 119 years. Similar to the predicted debt levels and risk premium this a low value, though not unreasonable as the last Spanish default episode occurred in 1936 (Reinhart \& Rogoff, 2015).
+
+\section{Computational algorithm}
+Before concluding chapter 2 and moving on to the results of the simulation, we will first discuss the computational algorithm which is used to solve the model. The solution algorithm will be based on an iterative procedure on the value functions $V_C$, $V_B$ and price functions $q$, $q_B$. The calculations, simulations and figures will all be performed and generated in the software package \texttt{Matlab}.\\
+
+In order for our algorithm to find a solution, a suitable grid or playing field needs to be defined. Unlike the original paper of Hatchondo et al. (2017), we solve this model using a Discrete State Space (DSS) approach, rather than interpolating over possible debt and output values. The grid points and values are presented in Table \ref{tab:Grid}.\\ 
+\begin{table}[h]
+\setlength{\arrayrulewidth}{0.3mm}
+\centering
+    \caption{\textbf{Outline of the model's grid}\label{tab:Grid}}
+    \vspace{1mm}
+ \begin{tabular}{lccc} 
+\hline\hline
+\textbf {Description}                &  \textbf {Grid points}       &&  \textbf {Grid Values}   \\[1ex] 
+\hline\hline
+Output grid                          & $n_y = 30$                   && [0.75,1.34]              \\[1ex]
+Defaultable debt grid                & $n_d = 200$                  && [0,4.5]                  \\[1ex]
+Non-Defaultable debt grid            & $n_e= 20$                    && [0,0.4]                  \\[1ex]
+\hline\hline
+\end{tabular}
+\end{table}
+
+Using the DSS approach over interpolation methods or other approximations has the advantage that it is more easy to replicate and to perform in \texttt{Matlab} without knowledge of other programming languages, e.g. \texttt{Julia} or \texttt{Fortran}. The disadvantages of the DSS approach, however, are that it is inefficient and its results might be sensitive to grid sparsity (Hatchondo, Martinez \& Sapriza, 2010). To partially control for this, different grid specifications will be considered and the outcome will be checked for significant differences.\\
+
+The algorithm used to solve our problem relies on value function iteration which relies on the fact that for the Bellman equations $V_C$ and $V_B$, Bellman's principle of optimality is satisfied. This principle states: "An optimal policy has the property that whatever the initial state and initial decisions are, the remaining decisions must constitute an optimal policy with regard to the state resulting from the first decisions (Bellman, 1954, p.4)." For our case this means that if we choose an arbitrary endpoint for our value functions, than it itself must have been the result from an optimal decision in the previous period.\\
+
+To clarify this idea by an example, if $V^T$ is the value function of the last period T and we arbitrarily set it to $V^T = 0$, then this value function must have been used in the maximization problem of the previous period:
+\begin{equation*}
+    V^{T-1} = \max\{ U + \beta E_{T-1} V^T\} = \max\{U + \beta E_{T-1} 0\}
+\end{equation*}
+The optimal policy of this problem then gives us $V^{T-1}$, which we can once more plug in to the Bellman equation of the previous period $V^{T-2}$. This procedure is done iteratively until an imposed convergence criteria is met. Using these instructions, we get the following method for our algorithm: \\
+\begin{enumerate}
+    \item\textbf{Step 1}: Make an initial guess for $V_C$, $V_B$, $V_A$, $\hat{p}$, $q$ and $q_B$. These will be last-period solutions of the finite-horizon economy.
+    \begin{itemize}
+        \item $V_C = V_B = V_A = 0$
+        \item $\hat{p} = 0$
+        \item $q = q_B = \frac{1}{1+r^*}$
+    \end{itemize}
+    \item\textbf{Step 2}: Plug these values in their respecting maximization problem and solve for the New, updated Values.
+    \item\textbf{Step 3}: Check whether the New Values differ from the Old Values:
+    \begin{itemize}
+        \item If $\|\text{New Values } - \text{ Old Values}\| >$ stopping criteria: update the Old Values with the New Values and go back to step 2.
+        \item If $\|\text{New Values } - \text{ Old Values}\| <$ stopping criteria: stop the iteration process.
+    \end{itemize}
+\end{enumerate}
+
+The stopping criteria is set at $10^{-8}$ and the final values for the functions $V_C$, $V_B$, $V_A$, $\hat{p}$, $q$ and $q_B$ are assumed to be the equilibrium conditions of the infinite-horizon economy.\\
+
+With these equilibrium conditions, we are able to run simulations and generate the statistics as discussed in the calibration section. Two types of simulations will be run to generate the results from chapter 3. The first type of simulation is a continuous simulation of 1 million periods of the optimal decision rules generated by the iterative procedure. The second type of simulation involves a process of 1000 samples each lasting 350 periods (87,5 years) where the Eurobond is introduced without any prior announcement. Both simulations involve a burn-in period to rule out possible influence of the starting position.\\
+
+Even though the value iteration routine might reliably give us a solution, there is no guarantee that the found solution is the only possible equilibrium. As shown in Aguiar \& Amadar (2019), the fixed point of our sovereign default model does not satisfy Blackwell's discounting condition for being a contraction mapping, which leads to no guarantees for uniqueness of the solution. To test whether our model is subject to this possible "multiplicity" of solutions, we follow the method by Önder (2016) and test the sensitivity to different starting points for the iteration procedure. These findings will be discussed in section 3.4.4.\\
